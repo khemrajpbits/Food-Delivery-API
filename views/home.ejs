@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant</title>
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="/css/all.min.css">
+</head>
+
+<body>
+  <%- include('navbar', {
+     role: "admin", 
+     isLoggedIn: 1 
+  }); %>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-utensils"></i> Restaurant
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="menu">
+              <i class="fas fa-concierge-bell"></i> Menu
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login">
+              <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="register">
+              <i class="fas fa-user-plus"></i> Register
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="order">
+              <i class="fas fa-shopping-cart"></i> Order
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="payment">
+              <i class="fas fa-credit-card"></i> Payment
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="delivery">
+              <i class="fas fa-shipping-fast"></i> Delivery
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <input type="text" class="form-control" id="restaurantSearch" placeholder="Search for restaurants..."
+      onkeyup="filterRestaurants()">
+  </div>
+
+  <!-- Restaurant List -->
+  <div class="container my-5" id="restaurantList">
+    <h4 class="text-center mb-4">
+      <i class="fas fa-store"></i> Restaurants
+    </h4>
+    <div class="row" id="restaurantCards">
+      <!-- Restaurant cards will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <!-- Menu Section -->
+  <div class="container my-5" id="menu" style="display: none;">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-clipboard-list"></i> Menu
+    </h2>
+    <div id="menuItems" class="scrollable"></div>
+  </div>
+
+  <!-- Customer Reviews Section -->
+  <div class="container my-5">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-comments"></i> Customer Reviews
+    </h2>
+    <div class="row scrollable" id="reviewList">
+      <div class="col-md-6 review-card">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">John Doe <i class="fas fa-star" style="color: gold;"></i> ★★★★☆</h5>
+            <p class="card-text">"Great food and amazing service!"</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 review-card">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Jane Smith <i class="fas fa-star" style="color: gold;"></i> ★★★★★</h5>
+            <p class="card-text">"The ambiance was perfect for a family dinner."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <div class="container my-5" id="about">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-info-circle"></i> About Us
+    </h2>
+    <p>Welcome to our restaurant! We offer a variety of delicious dishes prepared with the freshest ingredients. Our
+      team is dedicated to providing you with an unforgettable dining experience.</p>
+  </div>
+  <script src="/js/jquery-3.6.0.min.js"></script>
+
+  <script>
+    // Function to fetch restaurants from the API
+    // async function fetchRestaurants() {
+    //   try {
+    //     // const response = await fetch('/api/restaurants');
+        
+    //     // if (!response.ok) {
+    //     //   throw new Error('Network response was not ok');
+    //     // }
+
+    //     // const restaurants = await response.json();
+    //     renderRestaurants();
+    //   } catch (error) {
+    //     console.error('There was a problem with the fetch operation:', error);
+    //   }
+    // }
+
+    const apiUrl = '/api/restaurants'; // API base URL
+
+      async function fetchRestaurants() {          
+          const response = await fetch(apiUrl);
+          const restaurants = await response.json();
+          const restaurantList = document.getElementById('restaurantCards');
+          restaurantList.innerHTML = '';
+
+          restaurants.forEach(restaurant => {
+              const listItem = document.createElement('li');
+              listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+              listItem.innerHTML = `${restaurant.name} (${restaurant.location}) 
+                  <span>
+                      <button class="btn btn-warning btn-sm" onclick="editRestaurant('${restaurant._id}', '${restaurant.name}', '${restaurant.location}')">Edit</button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteRestaurant('${restaurant._id}')">Delete</button>
+                  </span>`;
+              restaurantList.appendChild(listItem);
+          });
+      }
+    // Function to render restaurant cards
+    function renderRestaurants() {
+      const restaurantCardsContainer = document.getElementById('restaurantCards');
+      restaurantCardsContainer.innerHTML = ''; // Clear existing content
+
+
+      // if (restaurants.length > 0) {
+      //   restaurants.forEach(restaurant => {
+      //     const restaurantCard = `
+      //       <div class="col-md-3 restaurant-card" data-name="${restaurant.restaurant_name}">
+      //         <div class="card h-100 rounded-5">
+      //           <img src="https://as1.ftcdn.net/v2/jpg/03/24/73/92/1000_F_324739203_keeq8udvv0P2h1MLYJ0GLSlTBagoXS48.jpg" class="card-img-top"
+      //             alt="${restaurant.restaurant_name || 'Restaurant Image'}">
+      //           <div class="card-body">
+      //             <h5 class="card-title">
+      //               ${restaurant.restaurant_name || 'Unnamed Restaurant'}
+      //             </h5>
+      //             <div class="d-flex align-items-center">
+      //               <span class="badge bg-success me-2">4.0</span>
+      //               <small class="text-muted">DINING</small>
+      //             </div>
+      //             <p class="card-text">
+      //               ${restaurant.address || 'Address not available'}
+      //             </p>
+      //             <button class="btn btn-primary" onclick="showMenu('${restaurant.restaurant_name}')">View Menu</button>
+      //           </div>
+      //         </div>
+      //       </div>`;
+      //     restaurantCardsContainer.innerHTML += restaurantCard;
+      //   });
+      // } else {
+      //   restaurantCardsContainer.innerHTML = '<p>No restaurants available.</p>';
+      // }
+    }
+
+    // Function to fetch menu items from the API
+    async function fetchMenu(restaurant) {
+      try {
+        const response = await fetch(`/api/menus?restaurant=${restaurant}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const menuItems = await response.json();
+        renderMenu(menuItems);
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    }
+
+    // Function to render menu items
+    function renderMenu(menuItems) {
+      const menuItemsContainer = document.getElementById('menuItems');
+      menuItemsContainer.innerHTML = ''; // Clear existing content
+
+      if (menuItems.length > 0) {
+        menuItems.forEach(item => {
+          const itemCard = `
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">${item.name}</h5>
+                <p class="card-text">Price: $${item.price} <del>$${item.discountPrice}</del></p>
+                <button class="btn btn-success" onclick="addToCart('${item.name}')">Add to Cart</button>
+              </div>
+            </div>`;
+          menuItemsContainer.innerHTML += itemCard;
+        });
+      } else {
+        menuItemsContainer.innerHTML = '<p>No menu items available.</p>';
+      }
+    }
+
+    function showMenu(restaurant) {
+      fetchMenu(restaurant);
+      document.getElementById("menu").style.display = 'block';
+    }
+
+    function addToCart(itemName) {
+      alert(`${itemName} added to cart!`);
+      // Implement cart logic here
+    }
+
+    function filterRestaurants() {
+      const searchInput = document.getElementById("restaurantSearch").value.toLowerCase();
+      const restaurantCards = document.querySelectorAll(".restaurant-card");
+
+      restaurantCards.forEach(card => {
+        const restaurantName = card.getAttribute('data-name').toLowerCase();
+        card.style.display = restaurantName.includes(searchInput) ? '' : 'none';
+      });
+    }
+
+ // Fetch restaurants when the page loads
+    window.onload = fetchRestaurants;
+  </script>
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script> -->
+  <script src="/js/popper.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html> 

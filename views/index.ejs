@@ -1,0 +1,41 @@
+function showFlashMessages(message, type) {
+    const alertsContainer = $('#alerts-container');
+    alertsContainer.html(''); // Clear previous alerts
+
+    const alertDiv = $(`
+        <div class="alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show" role="alert">
+            ${message}
+        </div>
+    `);
+    alertsContainer.append(alertDiv);
+
+    setTimeout(() => {
+        alertDiv.fadeOut(500, () => alertDiv.remove());
+    }, 2000);
+}
+
+$(document).ready(function() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('user_id');
+
+    if (token && userId) {
+        // Hide Login and Register links if token and user_id exist
+        $('a[href="/login"]').parent().hide();
+        $('a[href="/register"]').parent().hide();
+    }
+    if (token && userId) {
+        // Hide Login and Register links, show Logout button
+        $('a[href="/login"]').parent().hide();
+        $('a[href="/register"]').parent().hide();
+        $('#logout-item').show();
+    }
+
+    // Logout button click event
+    $('#logout-button').click(function(event) {
+        event.preventDefault(); // Prevent the default anchor behavior
+        localStorage.removeItem('token'); // Remove token from local storage
+        localStorage.removeItem('user_id'); // Remove user_id from local storage
+        window.location.href = '/login'; // Redirect to login page
+    });
+
+});

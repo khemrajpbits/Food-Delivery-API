@@ -1,0 +1,34 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+  }
+
+  .navbar {
+    background-color: #343a40;
+  }
+
+  .navbar a {
+    color: white;
+  }
+
+  .card-img-top {
+    height: 150px;
+    object-fit: cover;
+  }
+
+  .restaurant-card,
+  .review-card {
+    margin-bottom: 20px;
+  }
+
+  .scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  input[type="search"]::placeholder {
+    font-family: 'Font Awesome';
+    font-weight: 600;
+    text-align: right;
+  }
